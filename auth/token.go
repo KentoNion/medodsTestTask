@@ -2,6 +2,8 @@ package auth
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/pkg/errors"
+	"medodsTest/auth/store/pkg"
 	"time"
 )
 
@@ -28,3 +30,22 @@ func (t Token) MapToRefresh(cl pkg.Clock) jwt.Claims {
 		"exp":     time.Now().AddDate(1, 0, 0),
 	}
 }
+
+func (t Token) Fill(claims jwt.MapClaims) error {
+	var ok bool
+	t.IP, ok = claims["ip"].(string)
+	if !ok {
+		return errors.New("failed to parse ip")
+	}
+	t.Secret, ok = claims["secret"].(string)
+	if !ok {
+		return errors.New("failed to parse secret")
+	}
+	t.UserID, ok = claims["user_id"].(string)
+	if !ok {
+		return errors.New("failed to parse user_id")
+	}
+	return nil
+}
+
+var ErrWrongToken = errors.New("Wrong token")

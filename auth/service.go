@@ -60,8 +60,55 @@ func (s *service) Authorize(ctx context.Context, userID string, ip string) (acce
 
 }
 
-func (s *service) Refresh(ctx context.Context, refresh string, access string, ip string) (newAcess string, err error) {
-	//храним в базе
-	claims := jwt.Clains{}
-
+func (s *service) Refresh(ctx context.Context, refresh string, access string, ip string) (newAccess string, err error) {
+	//храним в базе в виде хеша
+	claims := jwt.MapClaims{}
+	exists, err := s.store.Get(ctx, refresh)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to check access token")
+	}
+	if !exists {
+		return "", errors.New("refresh token not found")
+	}
+	token, err := jwt.ParseWithClaims(refresh, &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(s.secretKey), nil
+	})
+	if !token.Valid {
+		return "", ErrWrongToken
+	}
+	refreshToken := Token{}
+	if err := refreshToken.Fill(claims); err != nil {
+		return "", errors.Wrap(err, "failed to parse refresh token")
+	}
+	token, err = jwt.ParseWithClaims(refresh, &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(s.secretKey), nil
+	})
+	if err != nil {
+		return "", ErrWrongToken
+	}
+	if !token.Valid {
+		return "", ErrWrongToken
+	}
+	accessToken := Token{}
+	if err := accessToken.Fill(claims); err != nil {
+		return "", errors.Wrap(err, "failed to parse access token")
+	}
+	if refreshToken.Secret != accessToken.Secret {
+		return "", ErrWrongToken
+	}
+	result := jwt.NewWithClaims(jwt.SigningMethodHS512, accessToken.MapToAcces(s.cl))
+	access, err = result.SignedString(s.secretKey)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to make access token")
+	}
+	if err := s.notifier.NotifyNewLogin(ctx, accessToken.UserID); err != nil {
+		return "", errors.Wrap(err, "failed to notify new login")
+	}
+	return access, nil
 }
