@@ -8,8 +8,8 @@ import (
 )
 
 type authStore interface {
-	Save()
-	Get()
+	Save(ctx context.Context, token string, userID string) error
+	Get(ctx context.Context, token string) (bool, error)
 }
 
 type notifier interface {
@@ -50,7 +50,10 @@ func (s *service) Authorize(ctx context.Context, userID string, ip string) (acce
 		return "", "", errors.Wrap(err, "failed to make refresh token")
 	}
 
-	s.store.Save(ctx, userID, refresh) //todo написать методы postgres
+	err = s.store.Save(ctx, userID, refresh)
+	if err != nil {
+		return "", "", err
+	}
 
 	return access, refresh, nil
 }
