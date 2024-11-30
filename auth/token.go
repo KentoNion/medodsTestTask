@@ -3,7 +3,7 @@ package auth
 import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
-	"medodsTest/auth/store/pkg"
+	"testovoe/auth/pkg"
 	"time"
 )
 

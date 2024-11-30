@@ -2,9 +2,10 @@ package auth
 
 import (
 	"context"
-	"github.com/pkg/errors"
-	"github.com/google/uuid"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"medodsTest/auth/pkg"
 )
 
 type authStore interface {
@@ -13,20 +14,22 @@ type authStore interface {
 }
 
 type notifier interface {
-	NotifyNewLogin()
+	NotifyNewLogin(ctx context.Context, userID string) error
 }
 
 type service struct {
-	store     authStore
 	secretKey string
+	store     authStore
 	notifier  notifier
+	cl        pkg.Clock
 }
 
-func NewService(secretKey string, store authStore, notifier notifier) *service {
+func NewService(secretKey string, store authStore, notifier notifier, cl pkg.Clock) *service {
 	return &service{
-		store:     store,
 		secretKey: secretKey,
+		store:     store,
 		notifier:  notifier,
+		cl:        cl,
 	}
 }
 
@@ -37,8 +40,7 @@ func (s *service) Authorize(ctx context.Context, userID string, ip string) (acce
 		Secret: uuid.New().String(),
 		IP:     ip,
 	}
-
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS512, token.MapToAcces(s.cl)) //todo написать clock
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS512, token.MapToAcces(s.cl))
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS512, token.MapToRefresh(s.cl))
 	access, err = accessToken.SignedString([]byte(s.secretKey))
 	if err != nil {
@@ -50,14 +52,9 @@ func (s *service) Authorize(ctx context.Context, userID string, ip string) (acce
 		return "", "", errors.Wrap(err, "failed to make refresh token")
 	}
 
-	err = s.store.Save(ctx, userID, refresh)
-	if err != nil {
-		return "", "", err
-	}
+	s.store.Save(ctx, userID, refresh)
 
 	return access, refresh, nil
-}
-
 }
 
 func (s *service) Refresh(ctx context.Context, refresh string, access string, ip string) (newAccess string, err error) {
