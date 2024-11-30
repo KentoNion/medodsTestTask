@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"medodsTest/auth"
+	"medodsTest/auth/pkg"
 	"net/http"
-	"testovoe/auth"
-	"testovoe/auth/pkg"
 )
 
 func main() {
