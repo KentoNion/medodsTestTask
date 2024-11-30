@@ -18,7 +18,7 @@ func (t Token) MapToAcces(cl pkg.Clock) jwt.Claims {
 		"user_id": t.UserID,
 		"secret":  t.Secret,
 		"ip":      t.IP,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     cl.Now().Add(time.Hour * 24).Unix(), //интерфейс получения времени + 24 часа
 	}
 }
 
@@ -27,7 +27,7 @@ func (t Token) MapToRefresh(cl pkg.Clock) jwt.Claims {
 		"user_id": t.UserID,
 		"secret":  t.Secret,
 		"ip":      t.IP,
-		"exp":     time.Now().AddDate(1, 0, 0),
+		"exp":     cl.Now().AddDate(1, 0, 0), //нтерфейс получения времени + 1 год
 	}
 }
 

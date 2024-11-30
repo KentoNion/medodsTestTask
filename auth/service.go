@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"medodsTest/auth/pkg"
 )
@@ -33,11 +32,11 @@ func NewService(secretKey string, store authStore, notifier notifier, cl pkg.Clo
 	}
 }
 
-func (s *service) Authorize(ctx context.Context, userID string, ip string) (access string, refresh string, err error) {
+func (s *service) Authorize(ctx context.Context, secret string, userID string, ip string) (access string, refresh string, err error) {
 	//JWT, SHA512, не храним
 	token := Token{
 		UserID: userID,
-		Secret: uuid.New().String(),
+		Secret: secret, //uuid.New().String() <-----------------------------------------------------------
 		IP:     ip,
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS512, token.MapToAcces(s.cl))

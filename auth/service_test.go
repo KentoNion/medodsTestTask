@@ -25,10 +25,10 @@ func TestAuthorize(t *testing.T) {
 	store.EXPECT().Save(gomock.Any(), "test_user", expectRefresh).Return(nil) //Ожидаю что будет вызвана функция save с указанными параметрами и для этих вызовов параметров верни nil
 
 	ctx := context.Background()
-	access, refresh, err := svc.Authorize(ctx, "test_user", "1.1.1.1")
+	access, refresh, err := svc.Authorize(ctx, "password", "test_user", "1.1.1.1")
 	require.NoError(t, err)
-	require.Equal(t, "test_user", access)
-	require.Equal(t, "1.1.1.1", refresh)
+	require.Equal(t, "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjcyMjI0MDAsImlwIjoiMS4xLjEuMSIsInNlY3JldCI6InBhc3N3b3JkIiwidXNlcl9pZCI6InRlc3RfdXNlciJ9.6sWj1XHsIs5m-KzpVNRGjkuvxcrO4kMjElXCzChZ4xhUlS04Yi6hp4tcDjmnoEP5WQ6jDU1ZPeEJ6ZEEMBMbIA", access)
+	require.Equal(t, "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDI1LTA5LTI0VDAwOjAwOjAwWiIsImlwIjoiMS4xLjEuMSIsInNlY3JldCI6InBhc3N3b3JkIiwidXNlcl9pZCI6InRlc3RfdXNlciJ9.7AoubHHDO0S3FsxWo7ldOrSQmdmfY6_rUNGXdxk3c0MU43DmlrwqWgokEaV0UoRnAoYAqFrcUz2VokFAiZdBhQ", refresh)
 }
 
 func TestVerifyNotExistedToken(t *testing.T) {
