@@ -27,7 +27,7 @@ func (t Token) MapToRefresh(cl pkg.Clock) jwt.Claims {
 		"user_id": t.UserID,
 		"secret":  t.Secret,
 		"ip":      t.IP,
-		"exp":     cl.Now().AddDate(1, 0, 0), //нтерфейс получения времени + 1 год
+		"exp":     cl.Now().AddDate(1, 0, 0), //интерфейс получения времени + 1 год
 	}
 }
 

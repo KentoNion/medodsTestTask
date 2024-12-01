@@ -31,6 +31,13 @@ func TestAuthorize(t *testing.T) {
 	require.Equal(t, "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDI1LTA5LTI0VDAwOjAwOjAwWiIsImlwIjoiMS4xLjEuMSIsInNlY3JldCI6InBhc3N3b3JkIiwidXNlcl9pZCI6InRlc3RfdXNlciJ9.7AoubHHDO0S3FsxWo7ldOrSQmdmfY6_rUNGXdxk3c0MU43DmlrwqWgokEaV0UoRnAoYAqFrcUz2VokFAiZdBhQ", refresh)
 }
 
+func testRefresh(t *testing.T, svc *service) {
+	ctrl := gomock.NewController(t)
+	store := mock.NewMockauthStore(ctrl)
+	notifier := mock.NewMocknotifier(ctrl)
+
+}
+
 func TestVerifyNotExistedToken(t *testing.T) {
 
 }

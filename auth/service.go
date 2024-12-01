@@ -51,7 +51,10 @@ func (s *service) Authorize(ctx context.Context, secret string, userID string, i
 		return "", "", errors.Wrap(err, "failed to make refresh token")
 	}
 
-	s.store.Save(ctx, userID, refresh)
+	err = s.store.Save(ctx, userID, refresh)
+	if err != nil {
+		return "", "", err
+	}
 
 	return access, refresh, nil
 }

@@ -2,21 +2,41 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" //драйвер postgres
 	"medodsTest/auth"
 	"medodsTest/auth/pkg"
+	"medodsTest/auth/store"
+	"medodsTest/migrations"
 	"net/http"
 )
 
 func main() {
-	srv := auth.NewService("my_secret", nil, nil, pkg.NormalClock{})
+	//main часть
+	//инициируем бд
+	conn, err := sqlx.Connect("postgres", "user=postgres password=postgres dbname=medodsTest host=localhost sslmode=disable")
+	if err != nil {
+		panic(err)
+	}
+	db := store.NewDB(conn)
+
+	//запускаем миграцию
+	err = migrations.RunGooseMigrations("medodsTest")
+	if err != nil {
+		panic(err)
+	}
+
+	//Серверная часть
+	srv := auth.NewService("my_secret", db, nil, pkg.NormalClock{})
 	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		userID := req.Header.Get("user")
+		secret := req.Header.Get("secret")
 		if userID == "" {
 			http.Error(w, "empty user", http.StatusUnauthorized)
 			return
 		}
-		refresh, access, err := srv.Authorize(ctx, userID, req.RemoteAddr)
+		refresh, access, err := srv.Authorize(ctx, secret, userID, req.RemoteAddr)
 		if err == auth.ErrWrongToken {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
