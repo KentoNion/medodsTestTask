@@ -48,4 +48,11 @@ func (t Token) Fill(claims jwt.MapClaims) error {
 	return nil
 }
 
+type AuthTokens struct {
+	Access  string `json:"access"`
+	Refresh string `json:"refresh"`
+}
+
 var ErrWrongToken = errors.New("Wrong token")
+
+var ErrRefreshTokenNotFound = errors.New("Refresh token not found")

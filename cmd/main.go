@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
+	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" //драйвер postgres
-	"medodsTest/auth"
-	"medodsTest/auth/pkg"
+	"go.uber.org/zap"
 	"medodsTest/auth/store"
+	notify "medodsTest/gates/notifier"
+	"medodsTest/gates/server"
 	"medodsTest/migrations"
 	"net/http"
 )
@@ -20,39 +21,24 @@ func main() {
 	}
 	db := store.NewDB(conn)
 
+	log, err := zap.NewDevelopment() // инструмент логирования ошибок
+	if err != nil {
+		panic(err)
+	}
+
+	notifier := notify.InitNotifier()
+
 	//запускаем миграцию
 	err = migrations.RunGooseMigrations("medodsTest")
 	if err != nil {
 		panic(err)
 	}
 
-	//Серверная часть
-	srv := auth.NewService("my_secret", db, nil, pkg.NormalClock{})
-	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
-		ctx := req.Context()
-		userID := req.Header.Get("user")
-		secret := req.Header.Get("secret")
-		if userID == "" {
-			http.Error(w, "empty user", http.StatusUnauthorized)
-			return
-		}
-		refresh, access, err := srv.Authorize(ctx, secret, userID, req.RemoteAddr)
-		if err == auth.ErrWrongToken {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		result := struct {
-			Refresh string `json:"refresh"`
-			Access  string `json:"access"`
-		}{Refresh: refresh, Access: access}
+	router := chi.NewRouter()
 
-		if err := json.NewEncoder(w).Encode(result); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	})
+	_ = server.NewServer(db, router, log, notifier)
+	err = http.ListenAndServe("localhost:8080", router)
+	if err != nil {
+		log.Error("server error", zap.Error(err))
+	}
 }

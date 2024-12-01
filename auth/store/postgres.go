@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	sq "github.com/Masterminds/squirrel"
 	"github.com/bool64/sqluct"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -10,14 +9,12 @@ import (
 
 type Store struct {
 	db *sqlx.DB
-	sq sq.StatementBuilderType
 	sm sqluct.Mapper
 }
 
 func NewDB(db *sqlx.DB) *Store {
 	return &Store{
 		db: db,
-		sq: sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
 		sm: sqluct.Mapper{Dialect: sqluct.DialectPostgres},
 	}
 }
@@ -43,12 +40,9 @@ func (s Store) Get(ctx context.Context, token string) (bool, error) {
 
 func (s Store) Delete(ctx context.Context, token string) error {
 	query := "DELETE FROM tokens WHERE token = $1"
-	rows, err := s.db.ExecContext(ctx, query, token)
+	_, err := s.db.ExecContext(ctx, query, token)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete")
-	}
-	if affected, _ := rows.RowsAffected(); affected == 0 {
-		return errors.New("failed to delete")
 	}
 	return nil
 }
