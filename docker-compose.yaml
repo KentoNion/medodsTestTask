@@ -1,0 +1,5 @@
+version: "v2.29.7-desktop.1"
+services:
+  auth:
+    build: .
+      Ns

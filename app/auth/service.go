@@ -8,7 +8,7 @@ import (
 )
 
 type authStore interface {
-	Save(ctx context.Context, token string, userID string, ip string) error
+	Save(ctx context.Context, token string, userID string) error
 	Get(ctx context.Context, token string) (bool, error)
 }
 
@@ -55,7 +55,7 @@ func (s *service) Authorize(ctx context.Context, secret string, userID string, i
 		return result, errors.Wrap(err, "failed to make refresh token")
 	}
 
-	err = s.store.Save(ctx, userID, refresh, ip)
+	err = s.store.Save(ctx, userID, refresh)
 	if err != nil {
 		return result, err
 	}

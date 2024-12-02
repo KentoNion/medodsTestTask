@@ -16,7 +16,7 @@ func TestInsertGetDelete(t *testing.T) {
 	db := NewDB(conn)
 	ctx := context.Background()
 
-	err = db.Save(ctx, "testToken", "testUser", "255.255.255.255")
+	err = db.Save(ctx, "testToken", "testUser")
 	require.NoError(t, err)
 
 	got, err := db.Get(ctx, "testToken")

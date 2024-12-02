@@ -19,9 +19,9 @@ func NewDB(db *sqlx.DB) *Store {
 	}
 }
 
-func (s Store) Save(ctx context.Context, token string, userID string, ip string) error {
-	query := "INSERT INTO tokens (user_id, token, ip) VALUES ($1, $2, $3) ON CONFLICT (token) DO UPDATE SET token = $2, ip = $3"
-	_, err := s.db.ExecContext(ctx, query, userID, token, ip)
+func (s Store) Save(ctx context.Context, token string, userID string) error {
+	query := "INSERT INTO tokens (user_id, token) VALUES ($1, $2) ON CONFLICT (token) DO UPDATE SET token = $2"
+	_, err := s.db.ExecContext(ctx, query, userID, token)
 	if err != nil {
 		return errors.Wrap(err, "failed to save token")
 	}
