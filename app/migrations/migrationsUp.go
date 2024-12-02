@@ -15,7 +15,7 @@ func RunGooseMigrations(dbname string) error {
 	)
 	// Устанавливаем переменные окружения
 	cmd.Env = append(os.Environ(),
-		"GOOSE_DRIVER=postgres", "GOOSE_DBSTRING=host=localhost user=postgres password=postgres database=medodsTest sslmode=")
+		"GOOSE_DRIVER=postgres", "GOOSE_DBSTRING=host=localhost user=postgres password=postgres database=medodsTest sslmode=dosable")
 
 	// Выполняем команду и захватываем вывод
 	_, err := cmd.CombinedOutput()

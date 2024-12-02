@@ -15,7 +15,7 @@ import (
 func main() {
 	//main часть
 	//инициируем бд
-	conn, err := sqlx.Connect("postgres", "user=postgres password=postgres dbname=medodsTest host=db sslmode=disable")
+	conn, err := sqlx.Connect("postgres", "user=postgres password=postgres dbname=medodsTest host=localhost sslmode=disable")
 	if err != nil {
 		panic(err)
 	}
