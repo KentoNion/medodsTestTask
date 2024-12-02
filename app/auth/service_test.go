@@ -28,7 +28,7 @@ func testAuthorize(t *testing.T) {
 	store.EXPECT().Save(gomock.Any(), "test_user", expectRefresh).Return(nil)
 
 	ctx := context.Background()
-	tok, err := svc.Authorize(ctx, "password", "test_user")
+	tok, err := svc.Authorize(ctx, "password", "test_user", "255.255.255.255")
 	require.NoError(t, err)
 	require.Equal(t, "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjcyMjI0MDAsImlwIjoiMS4xLjEuMSIsInNlY3JldCI6InBhc3N3b3JkIiwidXNlcl9pZCI6InRlc3RfdXNlciJ9.6sWj1XHsIs5m-KzpVNRGjkuvxcrO4kMjElXCzChZ4xhUlS04Yi6hp4tcDjmnoEP5WQ6jDU1ZPeEJ6ZEEMBMbIA", tok.Access)
 	require.Equal(t, "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDI1LTA5LTI0VDAwOjAwOjAwWiIsImlwIjoiMS4xLjEuMSIsInNlY3JldCI6InBhc3N3b3JkIiwidXNlcl9pZCI6InRlc3RfdXNlciJ9.7AoubHHDO0S3FsxWo7ldOrSQmdmfY6_rUNGXdxk3c0MU43DmlrwqWgokEaV0UoRnAoYAqFrcUz2VokFAiZdBhQ", tok.Refresh)
